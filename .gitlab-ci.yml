@@ -1,25 +1,6 @@
 stages:
-  - test
   - build
   - deploy
-
-test:
-  image: golang:1.18
-  tags:
-    - team6
-    - docker
-  stage: test
-  script:
-      - go install github.com/t-yuki/gocover-cobertura@latest
-      - go install github.com/jstemmer/go-junit-report@latest
-      - CGO_ENABLED=0 go test -v -coverprofile=coverage.txt -covermode count ./... > junit.txt
-      - go tool cover -func coverage.txt # for gitlab to calculate coverage
-      - go-junit-report < junit.txt > junit.xml
-      - gocover-cobertura < coverage.txt > coverage.xml
-  artifacts:
-    reports:
-      cobertura: coverage.xml
-      junit: junit.xml
 
 make_image:
   tags:
