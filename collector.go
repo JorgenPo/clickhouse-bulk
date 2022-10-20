@@ -307,7 +307,7 @@ func (c *Collector) Push(paramsIn string, content string) {
 func (c *Collector) ParseQuery(queryString string, body string) (params string, content string, insert bool) {
 	i := strings.Index(queryString, "query=")
 	if i >= 0 {
-		if HasPrefix(queryString[i+6:], "insert") {
+		if isInsertStatement(queryString[i+6:]) {
 			insert = true
 		}
 		var q string
@@ -337,7 +337,7 @@ func (c *Collector) ParseQuery(queryString string, body string) (params string, 
 		var q string
 		q, content = c.Parse(body)
 		q = strings.TrimSpace(q)
-		if HasPrefix(q, "insert") {
+		if isInsertStatement(q) {
 			insert = true
 		}
 		if queryString != "" {
@@ -347,6 +347,14 @@ func (c *Collector) ParseQuery(queryString string, body string) (params string, 
 		}
 	}
 	return strings.TrimSpace(params), strings.TrimSpace(content), insert
+}
+
+// isInsertStatement - check whether the query contains insert statement.
+// This function counts 'insert ... select ...' statements (clickhouse specific) as non insert (kind of update)
+func isInsertStatement(query string) bool {
+	query = strings.ToLower(query)
+	return strings.HasPrefix(query, "insert") &&
+		!strings.Contains(query, "select")
 }
 
 // Parse - parsing text for query and data
